@@ -284,10 +284,29 @@ app.get("/", (req, res) => {
             </div>
 
             <div class="card">
-                <h2>✅ Chaves Válidas Ativas</h2>
+                <h2>✅ Gerenciar Chaves Válidas</h2>
                 ${Object.keys(chavesValidas).map(key => 
-                    `<div class="key-item">${key}</div>`
+                    `<div class="key-item">
+                        <span style="flex: 1;">${key}</span>
+                        <button onclick="deleteKey('${key}')" style="background: #f44336; color: white; border: none; padding: 5px 10px; border-radius: 5px; cursor: pointer; margin-left: 10px;">❌ Remover</button>
+                    </div>`
                 ).join('')}
+                
+                <div style="margin-top: 20px; padding: 15px; background: #f0f8ff; border-radius: 8px; border-left: 4px solid #2196F3;">
+                    <h3 style="margin-bottom: 10px; color: #333;">➕ Adicionar Nova Chave</h3>
+                    <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                        <input 
+                            type="text" 
+                            id="newKeyInput" 
+                            placeholder="Digite a nova chave (ex: NOVA-CHAVE-123)"
+                            style="flex: 1; min-width: 200px; padding: 10px; border: 2px solid #ddd; border-radius: 5px; font-family: monospace;"
+                        >
+                        <button onclick="addNewKey()" style="background: #4CAF50; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; font-weight: bold;">
+                            ➕ Adicionar Chave
+                        </button>
+                    </div>
+                </div>
+                
                 <p style="margin-top: 15px; color: #666; font-size: 14px;">
                     Total: <strong>${Object.keys(chavesValidas).length} chaves</strong> configuradas
                 </p>
@@ -456,6 +475,74 @@ app.get("/", (req, res) => {
         // Focus input on load
         window.addEventListener('load', function() {
             document.getElementById('testKey').focus();
+        });
+
+        // Funções para gerenciar chaves
+        async function addNewKey() {
+            const input = document.getElementById('newKeyInput');
+            const key = input.value.trim();
+            
+            if (!key) {
+                alert('❌ Digite uma chave válida!');
+                return;
+            }
+            
+            try {
+                const response = await fetch('/api/keys', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ key: key })
+                });
+                
+                const result = await response.json();
+                
+                if (response.ok) {
+                    alert('✅ Chave adicionada com sucesso: ' + key);
+                    input.value = '';
+                    location.reload(); // Recarrega a página para mostrar a nova chave
+                } else {
+                    alert('❌ Erro: ' + result.error);
+                }
+            } catch (error) {
+                alert('❌ Erro ao adicionar chave: ' + error.message);
+            }
+        }
+
+        async function deleteKey(key) {
+            if (!confirm('❌ Tem certeza que deseja remover a chave: ' + key + '?')) {
+                return;
+            }
+            
+            try {
+                const response = await fetch('/api/keys/' + encodeURIComponent(key), {
+                    method: 'DELETE'
+                });
+                
+                const result = await response.json();
+                
+                if (response.ok) {
+                    alert('✅ Chave removida com sucesso: ' + key);
+                    location.reload(); // Recarrega a página para atualizar a lista
+                } else {
+                    alert('❌ Erro: ' + result.error);
+                }
+            } catch (error) {
+                alert('❌ Erro ao remover chave: ' + error.message);
+            }
+        }
+
+        // Enter key support para adicionar chave
+        document.addEventListener('DOMContentLoaded', function() {
+            const newKeyInput = document.getElementById('newKeyInput');
+            if (newKeyInput) {
+                newKeyInput.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter') {
+                        addNewKey();
+                    }
+                });
+            }
         });
     </script>
 </body>
