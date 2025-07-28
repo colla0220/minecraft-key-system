@@ -1,11 +1,17 @@
-
+{
+  "name": "minecraft-key-verification",
+  "version": "1.0.0",
+  "description": "Sistema de verificação de chaves para mod de Minecraft",
   "main": "index.js",
   "scripts": {
     "start": "node index.js",
-    "dev": "node index.js",
-    "build": "echo 'Build concluído - nenhuma compilação necessária'"
-    "build": "npm install",
-    "dev": "node index.js"
+    "build": "npm install"
   },
   "dependencies": {
     "express": "^4.18.2"
+  },
+  "engines": {
+    "node": "18.x"
+  },
+  "license": "MIT"
+}
